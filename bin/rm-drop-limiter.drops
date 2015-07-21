@@ -1,0 +1,146 @@
+#
+# This file configures the drop rates and limitations for rm-drop-limiter.
+#
+#
+# Each line in this file can be one of two types, depending on what it starts
+# with: "pool" or "drop". A drop customizes an item's drop settings. Pools
+# provide control over how many of an item or related items can spawn at once.
+#
+#
+# A "drop" line sets an item's server-wide drop rate as a percentage chance 
+# over a configurable [Timeframe].
+#
+# Examples:
+#   drop Selion            : 1     20%/day      limit 3/week
+#   drop Measure           : 111   35%/18hour                    
+#
+# In the examples above:
+#   - For every day that passes, there is a 20% chance that a Selion will drop,
+#     but never more than 3 within 7 days.
+#   - A measure has a 35% chance of dropping for every 18 hours that passes.
+#
+# The full format is:
+# 
+# drop [Description] : [Item Index] 
+#                      [Drop rate]/[Timeframe] 
+#                      limit [Total]/[Timeframe]      (optional)
+#                      pool [Pools]                   (optional)
+# Where:
+# - [Description] can be anything: it's just used for console/log readability.
+#
+# - [Item Index] is the standard Redmoon item index. Item kind is always
+#   assumed to be '6'.
+#
+# - "limit [Total]/[Timeframe]" is optional. If present, the item will only
+#   drop as long as less than [Total] of the item have been spawned during
+#   [Timeframe]. If not present, there will be no drop limit.
+#
+# - "pool [Pools]" is optional. If present, it sets a limit on how many of
+#   an item can be ready to drop at one time. Without it, if players aren't
+#   continually farming, the database limits will continue to grow and when
+#   someone finally gets on they could get hours or days worth of items, 
+#   server-wide, all at once. [Pools] is a comma-separated list of pool names
+#   (defined elsewhere in this file) to which this item should belong and
+#   count against.
+#
+# - [Timeframe] is of the format `[Count][sec/min/hour/day/week/month]`.
+#   [Count] is optional and defaults to '1'.
+#       Valid examples include:
+#           'min': 1 minute
+#           'hour': 1 hour
+#           '3day': 3 days
+#           '35min': 35 minutes
+#
+#
+# A "pool" line defines a drop pool. Any number of drops can belong to a pool
+# and a drop can belong to multiple pools. Example:
+# 
+#   pool unis 2
+#   pool ringset 1
+#
+#   drop Jupiter     : 1    50%/day     pool unis
+#   drop Graupnel    : 35   5%/hour     pool unis,ringset
+#   drop Topaz       : 36   5%/hour     pool unis,ringset
+#   drop Measure     : 111  80%/day
+#
+# In the above example configuration, all of the uniques belong to the pool
+# 'unis' which has a size of 2. Graupnel and Topaz also belong to the 'ringset'
+# pool, and 'Measure' belongs to no pool. This means that no matter what there
+# will never be more than 2 uniques ready to drop. It could be 2 Jupiters, 
+# 1 Jupiter and 1 Graupnel, etc but never more than 2 at one time. There will 
+# also never be a Graupnel and a Topaz waiting to drop at the same
+# time, since they both share a pool with a size of 1. Once either of them is
+# spawned the pool will be full until that item is dropped somewhere in-game.
+#
+#
+# Note:
+#   rm-drop-limiter does a lot of "partial" dice throws which aren't quite
+#   intuitive. For example, say you configure an item to drop with a 20%/day 
+#   chance and then set rm-drop-limiter.exe to run every hour. Instead of a 
+#   single 20% chance calculated once per day like you might expect, there 
+#   would instead be a roughly 0.833333333% chance calculated once every hour 
+#   (20% / 24 hours). So in this scenario, instead of there just being a 20% 
+#   chance for one item to drop per day, there could actually be up to 24 items
+#   spawned in a day (although incredibly unlikely). This is a consequence of 
+#   good design (the alternative is a recurring, predictable window of possible
+#   drops) but nonetheless may be undesirable. In order to prevent this, `limit`
+#   can be used. For example, in this scenario, a `limit 1/day` would prevent
+#   more than a single item from dropping during a day, no matter how many 
+#   partial dice throws are performed.
+#
+#
+
+
+
+pool all   1
+pool duras 1
+
+
+
+drop Fresh Breeze            : 23    17%/day      limit 1/2day   pool all
+
+drop Graupnel                : 35    13%/day      limit 1/18hour pool all
+drop Topaz                   : 36    13%/day      limit 2/18hour pool all
+drop Aquarine                : 37    13%/day      limit 1/18hour pool all
+
+drop Selion                  : 1     10%/day      limit 1/day    pool all
+drop Noas                    : 11    10%/day      limit 1/day    pool all
+drop Silpheed                : 26    10%/day      limit 1/day    pool all
+drop Elein                   : 28    25%/day      limit 1/day    pool all
+
+drop Tamas                   : 2     8%/day       limit 1/day    pool all
+drop Rajas                   : 15    8%/day       limit 1/day    pool all
+drop Largesse                : 24    8%/day       limit 1/day    pool all
+
+drop Spirit of Minerva       : 17    23%/day      limit 2/day    pool all
+drop Minerva's Tears         : 90    27%/day      limit 3/day    pool all
+drop Minerva's Robe          : 91    15%/day      limit 1/day    pool all
+drop Minerva's Blessings     : 92    15%/day      limit 1/day    pool all
+
+drop Parcae's Plate          : 93    8%/day       limit 1/2day   pool all
+drop Parcae's Buckle         : 94    8%/day       limit 1/2day   pool all
+
+drop Jupiter                 : 8     50%/week     limit 1/day    pool all
+drop Tears of Heliades       : 12    20%/week     limit 2/day    pool all
+
+drop Erinyes                 : 95    60%/year     limit 1/week   pool all
+drop Shield of Erinyes       : 98    30%/year     limit 1/3week  pool all
+drop Rage of Erinyes         : 96    90%/year     limit 1/4day   pool all
+drop Will of Erinyes         : 97    60%/year     limit 1/week   pool all 
+
+drop Sword of Aeolus         : 80    12%/day      limit 1/3day   pool all
+drop Wand of Gaia            : 81    12%/day      limit 1/3day   pool all
+drop Spear of Ares           : 82    12%/day      limit 1/3day   pool all
+drop Nemesis Bow             : 83    12%/day      limit 1/3day   pool all
+drop Madness Gun             : 84    12%/day      limit 1/3day   pool all
+
+drop God of War              : 10    20%/day      limit 2/day    pool all
+drop Infrascope              : 14    20%/day      limit 2/day    pool all
+drop Nagrepar                : 18    20%/day      limit 2/day    pool all
+
+drop Ariadne's Thread        : 41    10%/hour     limit 1/2hour  pool all
+drop Escape Capsule          : 45    10%/hour     limit 1/2hour  pool all
+drop Amnesia Green           : 68    10%/hour     limit 1/2hour  pool all
+drop Protection              : 196   50%/4hour    limit 3/day    pool all
+drop Durability              : 200   70%/15min                   pool duras
+

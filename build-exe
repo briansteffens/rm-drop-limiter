@@ -1,0 +1,7 @@
+#!/bin/bash
+
+dmcs -sdk:4 \
+    /out:"bin/rm-drop-limiter.exe" \
+    -r:"/usr/lib/mono/4.0/System.Data.dll" \
+    "src/Console.cs" \
+    "src/Shared.cs"
