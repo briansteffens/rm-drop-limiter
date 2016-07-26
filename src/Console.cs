@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 
 
 
@@ -9,6 +10,31 @@ namespace RmDropLimiter.CLI {
 public class Program
 {
     public static void Main(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Step();
+            return;
+        }
+
+        int frequency = 0;
+
+        if (args.Length != 2 || args[0] != "-repeat" ||
+            !int.TryParse(args[1], out frequency))
+        {
+            Console.WriteLine("Usage: rm-drop-limiter\n" +
+                              "       rm-drop-limiter -repeat 30");
+            return;
+        }
+
+        while (true)
+        {
+            Step();
+            Thread.Sleep(frequency * 1000);
+        }
+    }
+
+    static void Step()
     {
         DropLimiter limiter = null;
 
