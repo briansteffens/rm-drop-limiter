@@ -195,6 +195,8 @@ class ItemDBState
     // The difference between Limit and Count is the pool size, or the number
     // of drops waiting to be spawned into the world.
     public int Pool { get { return Limit > Count ? Limit - Count : 0; } }
+
+    public bool IsInDatabase { get; set; }
 }
 
 
@@ -309,7 +311,9 @@ class GameDB : IDisposable
     public ItemDBState GetOrCreate(int item_index)
     {
         if (!DBState.ContainsKey(item_index))
+        {
             DBState.Add(item_index, new ItemDBState());
+        }
 
         return DBState[item_index];
     }
@@ -320,22 +324,42 @@ class GameDB : IDisposable
 
         foreach (var r in Results("select ItemIndex as i, count(1) as c " +
                                   "from tblSpecialItem1 group by ItemIndex;"))
+        {
             GetOrCreate((int)r["i"]).Count = (int)r["c"];
+        }
 
         foreach (var r in Results("select ItemIndex as i, " +
                                   "ItemCountLimit as l " +
                                   "from tblSpecialItemLimit1;"))
-            GetOrCreate((int)r["i"]).Limit = (int)r["l"];
+        {
+            var item = GetOrCreate((int)r["i"]);
+
+            item.Limit = (int)r["l"];
+            item.IsInDatabase = true;
+        }
     }
 
     public void IncrementLimits(Dictionary<int,int> delta)
     {
         foreach (int item in delta.Keys)
-            Command("update tblSpecialItemLimit1 " +
-                    "set ItemCountLimit = ItemCountLimit + ? " +
-                    "where ItemIndex = ?;",
-                        delta[item],
-                        item);
+        {
+            if (!GetOrCreate(item).IsInDatabase)
+            {
+                Command(string.Format(
+                        "insert into tblSpecialItemLimit1 " +
+                        "(ItemKind, ItemIndex, ItemCountLimit) " +
+                        "values (6, {0}, {1});",
+                            item, delta[item]));
+            }
+            else
+            {
+                Command(string.Format(
+                        "update tblSpecialItemLimit1 " +
+                        "set ItemCountLimit = ItemCountLimit + {0} " +
+                        "where ItemIndex = {1};",
+                            delta[item], item));
+            }
+        }
     }
 }
 
