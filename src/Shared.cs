@@ -21,8 +21,8 @@ class StateNotFoundException : Exception { }
 
 
 // Represents a unit of time, which must be cleanly convertible to seconds.
-public enum TimeUnit 
-{ 
+public enum TimeUnit
+{
     sec  = 1,
     min  = 60,
     hour = 60 * 60,
@@ -46,7 +46,7 @@ static class ENV
 
         return ret;
     } }
-    
+
     // DateTime.Now.Ticks in seconds
     public static long NOW { get {
         return DateTime.Now.Ticks / 10000000;
@@ -94,7 +94,7 @@ public class TimeFrame
             ret.Count = long.Parse(count);
             input = input.Replace(count, "");
         }
-        
+
         ret.Unit = input.ToTimeUnit();
 
         return ret;
@@ -205,7 +205,7 @@ class GameDB : IDisposable
     public Dictionary<int,ItemDBState> DBState { get; protected set; }
 
     protected DbConnection Conn { get; set; }
-    
+
     public GameDB(Config config = null)
     {
         Config = config ?? new Config();
@@ -222,7 +222,7 @@ class GameDB : IDisposable
             throw new Exception("In config file, DatabaseDriver of [" +
                                 Config.DatabaseDriver + "] is invalid.");
         }
-        
+
         Conn.Open();
 
         UpdateDatabaseState();
@@ -243,7 +243,7 @@ class GameDB : IDisposable
 
         // unmanaged resources
 
-        if (Conn != null) 
+        if (Conn != null)
             Conn.Close();
 
         Conn = null;
@@ -265,7 +265,7 @@ class GameDB : IDisposable
             if (p[i].GetType() == typeof(int))
                 param.DbType = DbType.Int32;
             else
-                throw new Exception("Type " + p[i].GetType().Name + 
+                throw new Exception("Type " + p[i].GetType().Name +
                                     " cannot be handled by CreateCommand().");
 
             param.Value = p[i];
@@ -321,7 +321,7 @@ class GameDB : IDisposable
         foreach (var r in Results("select ItemIndex as i, count(1) as c " +
                                   "from tblSpecialItem1 group by ItemIndex;"))
             GetOrCreate((int)r["i"]).Count = (int)r["c"];
- 
+
         foreach (var r in Results("select ItemIndex as i, " +
                                   "ItemCountLimit as l " +
                                   "from tblSpecialItemLimit1;"))
@@ -331,7 +331,7 @@ class GameDB : IDisposable
     public void IncrementLimits(Dictionary<int,int> delta)
     {
         foreach (int item in delta.Keys)
-            Command("update tblSpecialItemLimit1 " + 
+            Command("update tblSpecialItemLimit1 " +
                     "set ItemCountLimit = ItemCountLimit + ? " +
                     "where ItemIndex = ?;",
                         delta[item],
@@ -352,7 +352,7 @@ static class DBPatch
             "where name = '" + TRIGGER_NAME + "' " +
             "and type = 'TR';"
         );
-        
+
         return check != null && !(check is DBNull);
     }
 
@@ -427,7 +427,7 @@ class State
                     Timestamp = long.Parse(parts[1])
                 });
             }
-            
+
             line_index++;
         }
     }
@@ -437,7 +437,7 @@ class State
         var sb = new StringBuilder();
 
         sb.AppendFormat("{0}{1}", LastRun, ENV.NL);
-        
+
         foreach (var h in History)
             sb.AppendFormat("{0}|{1}{2}", h.ItemIndex, h.Timestamp, ENV.NL);
 
@@ -450,7 +450,7 @@ class State
     {
         if (drop.Limit == null)
             return 0;
-    
+
         var to_delete = new List<DropEvent>();
 
         long oldest = drop.Limit.TimeFrame.ToSeconds();
@@ -498,14 +498,14 @@ class Config : Dictionary<string, string>
         foreach (string line_ in File.ReadAllLines(filename))
         {
             string line = line_.Trim();
-            
+
             if (line == "" || line.StartsWith("#"))
                 continue;
 
             var parts = new List<string>(line.Split('='));
 
             if (parts.Count < 2)
-                throw new Exception("In [" + filename + "], " + 
+                throw new Exception("In [" + filename + "], " +
                                     "unable to parse [" + line + "].");
 
             string key = parts[0].Trim();
@@ -513,7 +513,7 @@ class Config : Dictionary<string, string>
             parts.RemoveAt(0);
 
             string val = string.Join("=", parts.ToArray()).Trim();
- 
+
             this[key] = val;
         }
     }
@@ -566,7 +566,7 @@ public class Drop
         raw = string.Join(":", parts0);
 
         var parts = new List<string>(
-            raw.Trim().Split(new char[] { ' ', '\t' }, 
+            raw.Trim().Split(new char[] { ' ', '\t' },
                 StringSplitOptions.RemoveEmptyEntries));
 
         ItemIndex = int.Parse(parts[0]);
@@ -581,7 +581,7 @@ public class Drop
             Rate = decimal.Parse(spl[0].Replace("%", "")),
             TimeFrame = TimeFrame.Parse(spl[1])
         };
-        
+
         parts.RemoveAt(0);
         parts.RemoveAt(0);
 
@@ -604,10 +604,10 @@ public class Drop
 
             case "pool":
                 spl = parts[1].Split(',');
-                
+
                 foreach (string pool_name in spl)
                     this.PoolNames.Add(pool_name.Trim());
-                
+
                 break;
 
             default:
@@ -628,7 +628,7 @@ class Pool
 
     public Pool(string raw)
     {
-        var parts = raw.Split(new string[] { " ", "\t" }, 
+        var parts = raw.Split(new string[] { " ", "\t" },
                               StringSplitOptions.RemoveEmptyEntries);
 
         if (parts.Length != 3)
@@ -674,7 +674,7 @@ class Drops : List<Drop>
         var ret = Find(p => p.ItemIndex == itemindex);
 
         if (ret == null)
-            throw new Exception("Drop with item index [" + 
+            throw new Exception("Drop with item index [" +
                                 itemindex.ToString() + "] not found.");
 
         return ret;
@@ -730,7 +730,7 @@ public class CsvReport : Report
 {
     public string Filename { get; protected set; }
 
-    public CsvReport(string filename = null) 
+    public CsvReport(string filename = null)
     {
         Filename = ENV.PATH_ABS(filename ?? ENV.FILE_PREFIX + ".csv");
 
@@ -765,8 +765,8 @@ public class CsvReport : Report
     {
         var dt = new DateTime(timestamp * 10000000);
 
-        Row(dt.ToString("MM/dd/yyyy HH:mm:ss"), 
-            timestamp, 
+        Row(dt.ToString("MM/dd/yyyy HH:mm:ss"),
+            timestamp,
             drop.Description,
             drop.ItemIndex);
     }
@@ -780,11 +780,11 @@ class DropLimiter
     public State State { get; protected set; }
     public Logger Logger { get; protected set; }
     public GameDB GameDB { get; protected set; }
-    public Report Report { get; set; } 
+    public Report Report { get; set; }
 
     protected Random Random { get; set; }
 
-    public DropLimiter(Config config = null, 
+    public DropLimiter(Config config = null,
                        State state = null,
                        Logger logger = null,
                        GameDB gamedb = null,
@@ -810,8 +810,8 @@ class DropLimiter
     public Dictionary<int,int> Run(Drops drops)
     {
         long now = ENV.NOW;
-        long DELTA = now - State.LastRun;        
-        
+        long DELTA = now - State.LastRun;
+
         Logger.Log(ENV.NL + new String('=', 80));
         Logger.Log("= {0} second(s) since the last run.", DELTA);
         Logger.Log(new String('=', 80));
@@ -828,9 +828,9 @@ class DropLimiter
 
             long timeframe = drop.DropRate.TimeFrame.ToSeconds();
 
-            Logger.Log("{0} droprate: {1} ({2} seconds)", 
+            Logger.Log("{0} droprate: {1} ({2} seconds)",
                        drop.Description, drop.DropRate, timeframe);
-            Logger.Log("Dice throws: {0} sec / {1} sec = {2}", 
+            Logger.Log("Dice throws: {0} sec / {1} sec = {2}",
                        delta, timeframe, (decimal)delta / (decimal)timeframe);
 
 
@@ -842,7 +842,8 @@ class DropLimiter
                 delta = delta % timeframe;
             }
 
-            rates.Add((decimal)delta / (decimal)timeframe * drop.DropRate.Rate);
+            rates.Add((decimal)delta / (decimal)timeframe *
+                    drop.DropRate.Rate);
 
             int sim_index = 0;
             foreach (decimal rate in rates)
@@ -852,11 +853,11 @@ class DropLimiter
                 sim_end = sim_end < now ? sim_end : now;
                 int expired = State.Expire(drop, sim_end);
                 if (expired > 0)
-                    Logger.Log("\t{0} stale drops expired from history", 
+                    Logger.Log("\t{0} stale drops expired from history",
                                expired);
 
-                
-                Logger.LogPart("\tDice throw {0}%, {1} sec ago: ", 
+
+                Logger.LogPart("\tDice throw {0}%, {1} sec ago: ",
                                rate, now - sim_end);
 
                 if (State.IsMaxed(drop))
@@ -889,9 +890,9 @@ class DropLimiter
 
                 if (!outcome)
                     continue;
-               
+
                 GameDB.DBState[drop.ItemIndex].Limit++;
- 
+
                 if (drop.Limit != null)
                     State.History.Add(new DropEvent {
                         ItemIndex = drop.ItemIndex,

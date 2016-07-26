@@ -18,7 +18,7 @@ public class Program
         }
         catch (StateNotFoundException)
         {
-            Console.WriteLine("No previous state file found, exiting " + 
+            Console.WriteLine("No previous state file found, exiting " +
                               "without doing any drops. This is not an " +
                               "error, it is expected for the first run.");
             return;
