@@ -306,7 +306,7 @@ class GameDB : IDisposable
             }
     }
 
-    protected ItemDBState GetOrCreate(int item_index)
+    public ItemDBState GetOrCreate(int item_index)
     {
         if (!DBState.ContainsKey(item_index))
             DBState.Add(item_index, new ItemDBState());
@@ -872,7 +872,8 @@ class DropLimiter
                     int pool_size = 0;
 
                     foreach (var pooldrop in drops.GetDrops(pool))
-                        pool_size += GameDB.DBState[pooldrop.ItemIndex].Pool;
+                        pool_size += GameDB.GetOrCreate(
+                                pooldrop.ItemIndex).Pool;
 
                     if (pool_size >= pool.Size)
                     {
