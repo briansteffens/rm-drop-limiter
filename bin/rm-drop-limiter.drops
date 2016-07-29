@@ -7,12 +7,12 @@
 # provide control over how many of an item or related items can spawn at once.
 #
 #
-# A "drop" line sets an item's server-wide drop rate as a percentage chance 
+# A "drop" line sets an item's server-wide drop rate as a percentage chance
 # over a configurable [Timeframe].
 #
 # Examples:
 #   drop Selion            : 1     20%/day      limit 3/week
-#   drop Measure           : 111   35%/18hour                    
+#   drop Measure           : 111   35%/18hour
 #
 # In the examples above:
 #   - For every day that passes, there is a 20% chance that a Selion will drop,
@@ -20,9 +20,9 @@
 #   - A measure has a 35% chance of dropping for every 18 hours that passes.
 #
 # The full format is:
-# 
-# drop [Description] : [Item Index] 
-#                      [Drop rate]/[Timeframe] 
+#
+# drop [Description] : [Item Index]
+#                      [Drop rate]/[Timeframe]
 #                      limit [Total]/[Timeframe]      (optional)
 #                      pool [Pools]                   (optional)
 # Where:
@@ -38,7 +38,7 @@
 # - "pool [Pools]" is optional. If present, it sets a limit on how many of
 #   an item can be ready to drop at one time. Without it, if players aren't
 #   continually farming, the database limits will continue to grow and when
-#   someone finally gets on they could get hours or days worth of items, 
+#   someone finally gets on they could get hours or days worth of items,
 #   server-wide, all at once. [Pools] is a comma-separated list of pool names
 #   (defined elsewhere in this file) to which this item should belong and
 #   count against.
@@ -54,7 +54,7 @@
 #
 # A "pool" line defines a drop pool. Any number of drops can belong to a pool
 # and a drop can belong to multiple pools. Example:
-# 
+#
 #   pool unis 2
 #   pool ringset 1
 #
@@ -66,8 +66,8 @@
 # In the above example configuration, all of the uniques belong to the pool
 # 'unis' which has a size of 2. Graupnel and Topaz also belong to the 'ringset'
 # pool, and 'Measure' belongs to no pool. This means that no matter what there
-# will never be more than 2 uniques ready to drop. It could be 2 Jupiters, 
-# 1 Jupiter and 1 Graupnel, etc but never more than 2 at one time. There will 
+# will never be more than 2 uniques ready to drop. It could be 2 Jupiters,
+# 1 Jupiter and 1 Graupnel, etc but never more than 2 at one time. There will
 # also never be a Graupnel and a Topaz waiting to drop at the same
 # time, since they both share a pool with a size of 1. Once either of them is
 # spawned the pool will be full until that item is dropped somewhere in-game.
@@ -75,17 +75,17 @@
 #
 # Note:
 #   rm-drop-limiter does a lot of "partial" dice throws which aren't quite
-#   intuitive. For example, say you configure an item to drop with a 20%/day 
-#   chance and then set rm-drop-limiter.exe to run every hour. Instead of a 
-#   single 20% chance calculated once per day like you might expect, there 
-#   would instead be a roughly 0.833333333% chance calculated once every hour 
-#   (20% / 24 hours). So in this scenario, instead of there just being a 20% 
+#   intuitive. For example, say you configure an item to drop with a 20%/day
+#   chance and then set rm-drop-limiter.exe to run every hour. Instead of a
+#   single 20% chance calculated once per day like you might expect, there
+#   would instead be a roughly 0.833333333% chance calculated once every hour
+#   (20% / 24 hours). So in this scenario, instead of there just being a 20%
 #   chance for one item to drop per day, there could actually be up to 24 items
-#   spawned in a day (although incredibly unlikely). This is a consequence of 
+#   spawned in a day (although incredibly unlikely). This is a consequence of
 #   good design (the alternative is a recurring, predictable window of possible
 #   drops) but nonetheless may be undesirable. In order to prevent this, `limit`
 #   can be used. For example, in this scenario, a `limit 1/day` would prevent
-#   more than a single item from dropping during a day, no matter how many 
+#   more than a single item from dropping during a day, no matter how many
 #   partial dice throws are performed.
 #
 #
